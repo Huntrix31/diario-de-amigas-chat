@@ -52,6 +52,7 @@
             overflow: hidden;
         }
 
+
         /* Contenedor de mensajes */
         #messages {
             flex-grow: 1;
@@ -190,6 +191,17 @@
     <!-- Scripts de Firebase -->
     <script type="module">
         // Importación de módulos de Firebase
+
+  const firebaseConfig = {
+  apiKey: "AIzaSyAO56UMbB4YdZDd24pNZbVYhndh3cjMPPE",
+  authDomain: "chatdeamigas-ad134.firebaseapp.com",
+  projectId: "chatdeamigas-ad134",
+  storageBucket: "chatdeamigas-ad134.firebasestorage.app",
+  messagingSenderId: "331860276513",
+  appId: "1:331860276513:web:b19ffccd44d4cf8c94ba60",
+  measurementId: "G-06KR26W218"
+};
+
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, query, addDoc, serverTimestamp, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
