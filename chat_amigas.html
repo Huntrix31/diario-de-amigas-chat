@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diario de Amigas Digital</title>
+    <!-- Carga de Tailwind CSS para el estilo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configuración del tema de Tailwind para colores vibrantes -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'pink-fun': '#FF69B4', // Rosa fuerte
+                        'purple-magic': '#8A2BE2', // Azul violeta
+                        'yellow-sun': '#FFD700', // Dorado
+                        'mint-fresh': '#00FA9A', // Menta
+                    },
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                        'handwriting': ['Kalam', 'cursive'], // Usaremos una fuente divertida si estuviera disponible, pero Inter como base segura
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Estilo base para el cuerpo */
+        body {
+            background-color: #f7f3f9; /* Fondo muy claro y suave */
+            font-family: 'inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* Contenedor principal del chat, parece un cuaderno */
+        .chat-container {
+            width: 100%;
+            max-width: 768px;
+            height: 80vh; /* Altura más cómoda en la pantalla */
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(138, 43, 226, 0.2); /* Sombra mágica */
+            border: 5px solid #8A2BE2; /* Borde violeta */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Contenedor de mensajes */
+        #messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: linear-gradient(180deg, #fefefe 0%, #fefcfd 100%); /* Efecto papel suave */
+            scroll-behavior: smooth;
+        }
+
+        /* Estilo para cada burbuja de chat */
+        .message-bubble {
+            margin-bottom: 12px;
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 85%;
+            word-wrap: break-word;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            font-size: 1rem;
+            line-height: 1.4;
+        }
+
+        /* Burbuja para mensajes propios */
+        .my-message {
+            background-color: '#FF69B4'; /* Pink Fun */
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 2px;
+        }
+
+        /* Burbuja para mensajes de otras amigas */
+        .friend-message {
+            background-color: '#e0f7fa'; /* Un color base suave */
+            color: #333;
+            margin-right: auto;
+            border-bottom-left-radius: 2px;
+            border: 1px solid #00FA9A; /* Borde sutil de Menta */
+        }
+
+        /* Contenedor de entrada de texto */
+        .input-area {
+            padding: 15px 20px;
+            border-top: 1px solid #e0e0e0;
+            background-color: #ffffff;
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Estilo para el campo de texto */
+        #messageInput {
+            flex-grow: 1;
+            border: 2px solid #8A2BE2;
+            border-radius: 25px;
+            padding: 10px 15px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        #messageInput:focus {
+            border-color: #FF69B4;
+        }
+
+        /* Estilo del botón de enviar */
+        #sendButton {
+            background-color: #8A2BE2; /* Purple Magic */
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        #sendButton:hover {
+            background-color: #6A1BAE;
+            transform: scale(1.02);
+        }
+
+        #sendButton:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <!-- Encabezado de la App -->
+        <header class="p-4 bg-purple-magic text-white text-center rounded-t-[15px] shadow-md">
+            <h1 class="text-2xl font-bold font-inter">💖 Diario Secreto de Amigas 💬</h1>
+        </header>
+
+        <!-- Área de mensajes (donde se ven los chats) -->
+        <div id="messages">
+            <!-- Los mensajes se cargarán aquí -->
+            <div id="loadingIndicator" class="text-center p-4 text-purple-magic font-bold">Cargando la magia del chat...</div>
+        </div>
+
+        <!-- Panel de configuración de usuario (Nombre y Color) -->
+        <div id="userSettings" class="p-4 bg-yellow-sun/20 border-t border-yellow-sun/50 flex flex-col gap-3">
+            <h3 class="text-sm font-semibold text-purple-magic">Mi Secreto de Amiga:</h3>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <input type="text" id="nameInput" placeholder="Escribe tu Nombre de Amiga Secreta (Ej: Estrella)" class="p-2 border rounded-lg flex-grow shadow-inner text-sm">
+                <select id="colorSelect" class="p-2 border rounded-lg shadow-inner text-sm bg-white">
+                    <option value="#FF69B4">💗 Mi Color (Rosa)</option>
+                    <option value="#8A2BE2">💜 Color (Violeta)</option>
+                    <option value="#00FA9A">💚 Color (Menta)</option>
+                    <option value="#FFD700">💛 Color (Sol)</option>
+                    <option value="#FF4500">🧡 Color (Naranja)</option>
+                    <option value="#1E90FF">💙 Color (Azul)</option>
+                </select>
+                <button id="saveSettingsButton" class="bg-purple-magic text-white p-2 rounded-lg font-bold text-sm hover:bg-pink-fun transition duration-200">Guardar</button>
+            </div>
+            <p id="authStatus" class="text-xs text-gray-600 mt-1">
+                Mi ID Secreto (compártelo solo si es necesario): <span id="userIdDisplay" class="font-mono text-purple-magic font-bold break-all">Cargando...</span>
+            </p>
+        </div>
+
+        <!-- Área de entrada de texto y botón de enviar -->
+        <div class="input-area">
+            <input type="text" id="messageInput" placeholder="Escribe un mensaje mágico aquí..." disabled>
+            <button id="sendButton" disabled>Enviar ✨</button>
+        </div>
+
+        <!-- Modal para mostrar mensajes de error/información (reemplaza alert()) -->
+        <div id="appModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full text-center">
+                <h4 id="modalTitle" class="text-xl font-bold mb-3 text-pink-fun"></h4>
+                <p id="modalMessage" class="mb-5"></p>
+                <button onclick="closeModal()" class="bg-purple-magic text-white px-6 py-2 rounded-lg hover:bg-pink-fun transition">Entendido</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts de Firebase -->
+    <script type="module">
+        // Importación de módulos de Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, query, addDoc, serverTimestamp, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Configuración inicial de las variables globales
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Elementos del DOM
+        const messagesContainer = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const userIdDisplay = document.getElementById('userIdDisplay');
+        const nameInput = document.getElementById('nameInput');
+        const colorSelect = document.getElementById('colorSelect');
+        const saveSettingsButton = document.getElementById('saveSettingsButton');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+
+        // Variables de Firebase
+        let app, db, auth;
+        let userId = null;
+        let userName = 'Amiga Secreta';
+        let userColor = '#FF69B4'; // Color por defecto
+
+        // Rutas de Firestore
+        const getProfileDocRef = (uid) => doc(db, 'artifacts', appId, 'users', uid, 'user_profile', 'settings');
+        const getChatCollectionRef = () => collection(db, 'artifacts', appId, 'public', 'data', 'amigas_chat');
+
+        // Inicializar Firebase
+        try {
+            if (Object.keys(firebaseConfig).length > 0) {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                setLogLevel('debug'); // Ver logs de Firestore
+                console.log("Firebase inicializado.");
+            } else {
+                showModal("Error", "La configuración de Firebase no está disponible. El chat no funcionará correctamente.");
+                // Se eliminó el 'return' ilegal que causaba el error de sintaxis.
+            }
+        } catch (error) {
+            console.error("Error al inicializar Firebase:", error);
+            showModal("Error", "Hubo un problema al iniciar la conexión mágica. Revisa la consola para más detalles.");
+            // Se eliminó el 'return' ilegal que causaba el error de sintaxis.
+        }
+
+        // --- Funciones del Modal (reemplazo de alert/confirm) ---
+
+        /**
+         * Muestra un modal con un mensaje de información.
+         * @param {string} title Título del modal.
+         * @param {string} message Mensaje a mostrar.
+         */
+        function showModal(title, message) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalMessage').textContent = message;
+            document.getElementById('appModal').style.display = 'flex';
+        }
+
+        /** Cierra el modal de información. */
+        window.closeModal = function() {
+            document.getElementById('appModal').style.display = 'none';
+        }
+
+
+        // --- Lógica de Autenticación y Perfil ---
+
+        /**
+         * Maneja el inicio de sesión con el token personalizado o de forma anónima.
+         */
+        async function handleAuth() {
+            try {
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Error en la autenticación de Firebase:", error);
+                showModal("Error de Autenticación", "No pudimos iniciar sesión. El chat no funcionará.");
+            }
+        }
+
+        /**
+         * Carga el nombre y color guardados del usuario.
+         */
+        async function loadUserProfile(uid) {
+            try {
+                const docRef = getProfileDocRef(uid);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    userName = data.name || 'Amiga Secreta';
+                    userColor = data.color || '#FF69B4';
+                    nameInput.value = userName;
+                    colorSelect.value = userColor;
+                    console.log(`Perfil cargado: ${userName}, ${userColor}`);
+                } else {
+                    console.log("Perfil no encontrado, usando valores por defecto.");
+                    // Guardar perfil por defecto
+                    await saveUserProfile();
+                }
+            } catch (e) {
+                console.error("Error al cargar el perfil de usuario:", e);
+                showModal("Error", "No se pudo cargar tu perfil. Usarás un nombre por defecto.");
+            }
+        }
+
+        /**
+         * Guarda el nombre y color del usuario en Firestore (Datos Privados).
+         */
+        async function saveUserProfile() {
+            const newName = nameInput.value.trim() || 'Amiga Secreta';
+            const newColor = colorSelect.value;
+            if (!userId) return;
+
+            try {
+                const docRef = getProfileDocRef(userId);
+                await setDoc(docRef, {
+                    name: newName,
+                    color: newColor,
+                    updatedAt: serverTimestamp()
+                }, { merge: true });
+
+                userName = newName;
+                userColor = newColor;
+                showModal("¡Guardado!", `Tu nombre (${userName}) y color secreto están listos para chatear.`);
+                console.log("Perfil guardado con éxito.");
+
+            } catch (e) {
+                console.error("Error al guardar el perfil:", e);
+                showModal("Error al Guardar", "No se pudo guardar tu nombre. Intenta de nuevo.");
+            }
+        }
+
+        // Listener para el estado de autenticación
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                userId = user.uid;
+                userIdDisplay.textContent = userId;
+                await loadUserProfile(userId);
+                setupChatListeners();
+                // Habilitar elementos de chat
+                messageInput.disabled = false;
+                sendButton.disabled = false;
+                loadingIndicator.textContent = '¡Lista para chatear!';
+                console.log("Usuario autenticado. ID:", userId);
+            } else {
+                userIdDisplay.textContent = 'ID no disponible';
+                // Si no está autenticado, intentar el proceso de inicio de sesión
+                await handleAuth();
+            }
+        });
+
+
+        // --- Lógica de Chat ---
+
+        /**
+         * Crea el elemento HTML para un mensaje.
+         * @param {object} message El objeto del mensaje de Firestore.
+         */
+        function createMessageElement(message) {
+            const isMyMessage = message.senderId === userId;
+            const bubbleClass = isMyMessage ? 'my-message' : 'friend-message';
+            const senderStyle = isMyMessage ? 'font-bold text-white' : 'font-bold';
+            const time = message.timestamp ? new Date(message.timestamp.toDate()).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : 'Ahora';
+
+            const div = document.createElement('div');
+            div.className = `message-bubble ${bubbleClass}`;
+
+            // Nombre y color de la amiga
+            const nameSpan = document.createElement('span');
+            nameSpan.className = senderStyle;
+            nameSpan.textContent = isMyMessage ? 'Yo' : message.senderName || 'Amiga';
+            if (!isMyMessage && message.senderColor) {
+                nameSpan.style.color = message.senderColor;
+            }
+
+            // El texto del mensaje
+            const textP = document.createElement('p');
+            textP.textContent = message.text;
+            textP.className = 'mt-1';
+
+            // Hora del mensaje
+            const timeSpan = document.createElement('span');
+            timeSpan.textContent = time;
+            timeSpan.className = `text-xs mt-1 ${isMyMessage ? 'text-white/80' : 'text-gray-500'} block text-right`;
+
+            div.appendChild(nameSpan);
+            div.appendChild(textP);
+            div.appendChild(timeSpan);
+
+            return div;
+        }
+
+        /**
+         * Envía un nuevo mensaje a Firestore.
+         */
+        async function sendMessage() {
+            if (!userId) {
+                showModal("¡Espera!", "Necesitas un ID de amiga para enviar mensajes. Espera un momento mientras se carga.");
+                return;
+            }
+
+            const text = messageInput.value.trim();
+            if (text === '') return;
+
+            // Limpia la caja de texto
+            messageInput.value = '';
+
+            try {
+                // Agregar el documento a la colección de chat
+                await addDoc(getChatCollectionRef(), {
+                    text: text,
+                    senderId: userId,
+                    senderName: userName, // Usa el nombre guardado
+                    senderColor: userColor, // Usa el color guardado
+                    timestamp: serverTimestamp()
+                });
+                console.log("Mensaje enviado.");
+            } catch (e) {
+                console.error("Error al enviar el mensaje:", e);
+                showModal("Error al Enviar", "No se pudo enviar tu mensaje mágico. Intenta de nuevo.");
+                // Opcional: Volver a poner el texto en el input si falla
+                messageInput.value = text;
+            }
+        }
+
+        /**
+         * Configura el listener de tiempo real para nuevos mensajes.
+         */
+        function setupChatListeners() {
+            if (!db) return;
+
+            // Query: obtener mensajes, ordenados por fecha de forma ascendente
+            const q = query(getChatCollectionRef(), orderBy('timestamp', 'asc'));
+
+            // Escuchador en tiempo real
+            onSnapshot(q, (snapshot) => {
+                loadingIndicator.style.display = 'none';
+                messagesContainer.innerHTML = ''; // Limpia mensajes antiguos
+
+                snapshot.forEach((doc) => {
+                    const message = doc.data();
+                    const messageElement = createMessageElement(message);
+                    messagesContainer.appendChild(messageElement);
+                });
+
+                // Desplazar hacia el último mensaje (al fondo)
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }, (error) => {
+                console.error("Error al escuchar los mensajes:", error);
+                loadingIndicator.textContent = '¡Error! No se pudieron cargar los mensajes.';
+                showModal("Error de Conexión", "Perdimos la conexión mágica con el chat. Recarga la página.");
+            });
+        }
+
+        // --- Eventos ---
+
+        // Evento para enviar mensaje al hacer clic
+        sendButton.addEventListener('click', sendMessage);
+
+        // Evento para enviar mensaje al presionar Enter en el input
+        messageInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Evento para guardar la configuración de nombre/color
+        saveSettingsButton.addEventListener('click', saveUserProfile);
+
+        // Inicia el proceso de autenticación al cargar la ventana
+        if (auth) {
+             handleAuth();
+        }
+
+    </script>
+</body>
+</html>
